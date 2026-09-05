@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{Escrow, ESCROW_SEED};
+use crate::{error::ErrorCode, Escrow, ESCROW_SEED};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
@@ -11,14 +11,17 @@ use anchor_spl::{
 pub struct Make<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
+
     #[account(
         mint::token_program = token_program
     )]
     pub mint_a: InterfaceAccount<'info, Mint>,
+
     #[account(
         mint::token_program = token_program
     )]
     pub mint_b: InterfaceAccount<'info, Mint>,
+
     #[account(
         mut,
         associated_token::mint = mint_a,
@@ -26,6 +29,7 @@ pub struct Make<'info> {
         associated_token::token_program = token_program
     )]
     pub maker_ata_a: InterfaceAccount<'info, TokenAccount>,
+
     #[account(
         init,
         payer = maker,
@@ -34,6 +38,7 @@ pub struct Make<'info> {
         bump
     )]
     pub escrow: Account<'info, Escrow>,
+
     #[account(
         init,
         payer = maker,
@@ -42,10 +47,12 @@ pub struct Make<'info> {
         associated_token::token_program = token_program
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
+
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
+
 impl<'info> Make<'info> {
     //Initialize escrow
     pub fn init_escrow(
@@ -55,6 +62,12 @@ impl<'info> Make<'info> {
         bumps: &MakeBumps,
         expiration: i64,
     ) -> Result<()> {
+        require!(
+            expiration > Clock::get()?.unix_timestamp,
+            ErrorCode::InvalidExpiry
+        );
+        require!(self.mint_a.key() != self.mint_b.key(), ErrorCode::SameMint);
+
         self.escrow.set_inner(Escrow {
             seed,
             maker: self.maker.key(),
@@ -62,13 +75,15 @@ impl<'info> Make<'info> {
             mint_b: self.mint_b.key(),
             receive: receive,
             bump: bumps.escrow,
-            expiration: expiration,
+            expiration,
         });
         Ok(())
     }
 
     //Deposit tokens from maker to vault
     pub fn deposit(&mut self, deposit: u64) -> Result<()> {
+        require!(deposit > 0, ErrorCode::InvalidAmount);
+
         let transfer_accounts = TransferChecked {
             from: self.maker_ata_a.to_account_info(),
             mint: self.mint_a.to_account_info(),

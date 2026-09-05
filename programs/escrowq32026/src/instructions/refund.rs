@@ -67,8 +67,6 @@ impl<'info> Refund<'info> {
 
         let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, &signer_seeds);
 
-        close_account(cpi_context)?;
-
-        Ok(())
+        close_account(cpi_context)
     }
 }
