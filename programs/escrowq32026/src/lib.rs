@@ -3,13 +3,11 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 
-use anchor_lang::prelude::*;
-
 pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("5Y6HMSgNYbkcBiQCukYvTK56aQarSpq1Nk9aiSsjws2o");
+declare_id!("u6KexT8KmdzPs1uzd2sRDfKr4V5ZTT2GSSku4n7fEWS");
 
 // Two parties — a maker and a taker — can swap tokens without trusting each other or a third party.
 // The maker deposits token A into a program-controlled vault and specifies how much of token B they want in return.
@@ -37,8 +35,10 @@ pub mod escrowq32026 {
         ctx.accounts.deposit(deposit)
     }
 
-    //take instruction
-    //TODO:
+    #[instruction(discriminator = 1)]
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.withdraw()
+    }
 
     #[instruction(discriminator = 2)]
     pub fn refund(ctx: Context<Refund>) -> Result<()> {
