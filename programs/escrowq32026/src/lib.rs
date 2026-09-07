@@ -46,7 +46,7 @@ pub mod escrowq32026 {
     }
 
     #[instruction(discriminator = 3)]
-    pub fn update(ctx: Context<Update>, receive: u64, expiration: i64) -> Result<()> {
-        ctx.accounts.update(expiration, receive)
+    pub fn update(ctx: Context<Update>, expiration: i64) -> Result<()> {
+        ctx.accounts.update(expiration)
     }
 }

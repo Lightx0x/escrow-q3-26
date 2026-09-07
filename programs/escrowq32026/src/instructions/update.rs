@@ -16,18 +16,12 @@ pub struct Update<'info> {
 }
 
 impl<'info> Update<'info> {
-    pub fn update(&mut self, expiration: i64, receive: u64) -> Result<()> {
-        if receive != 0 {
-            self.escrow.receive = receive;
-        }
-
-        if expiration != 0 {
-            require!(
-                expiration > Clock::get()?.unix_timestamp,
-                ErrorCode::InvalidExpiry
-            );
-            self.escrow.expiration = expiration;
-        }
+    pub fn update(&mut self, expiration: i64) -> Result<()> {
+        require!(
+            expiration > Clock::get()?.unix_timestamp,
+            ErrorCode::InvalidExpiry
+        );
+        self.escrow.expiration = expiration;
 
         Ok(())
     }

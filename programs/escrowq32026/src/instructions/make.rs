@@ -66,6 +66,7 @@ impl<'info> Make<'info> {
             expiration > Clock::get()?.unix_timestamp,
             ErrorCode::InvalidExpiry
         );
+        require!(receive > 0, ErrorCode::InvalidAmount);
         require!(self.mint_a.key() != self.mint_b.key(), ErrorCode::SameMint);
 
         self.escrow.set_inner(Escrow {

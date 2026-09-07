@@ -14,6 +14,7 @@ pub struct Take<'info> {
     #[account(mut)]
     pub taker: Signer<'info>,
 
+    #[account(mut)]
     pub maker: SystemAccount<'info>,
 
     #[account(
